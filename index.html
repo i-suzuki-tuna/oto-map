@@ -71,8 +71,17 @@ h2{margin:0;font-size:1.25rem;line-height:1.35;display:flex;gap:.45rem;align-ite
 .qplay.playing .wave i{animation:wave .7s ease-in-out infinite alternate}
 .wave i:nth-child(2){animation-delay:.1s}.wave i:nth-child(3){animation-delay:.2s}.wave i:nth-child(4){animation-delay:.3s}.wave i:nth-child(5){animation-delay:.4s}
 .card.playing .btn-txt::after{content:"…"}
+/* tabs */
+.tabs{display:flex;justify-content:center;gap:.8rem;padding:1.2rem 1rem .4rem;position:sticky;top:0;z-index:10;
+  background:linear-gradient(var(--sky) 75%,transparent)}
+.tab{border:0;border-radius:999px;font:inherit;font-weight:700;font-size:1.1rem;padding:.75rem 1.6rem;cursor:pointer;
+  background:var(--paper);color:var(--ink2);box-shadow:var(--shadow);transition:transform .1s}
+.tab[aria-selected="true"]{background:var(--sun);color:#3A2E00;box-shadow:0 6px 0 #D9AE00}
+.tab:active{transform:translateY(3px)}
+.tab:focus-visible{outline:4px solid var(--lav);outline-offset:3px}
+.qhide{display:none!important}
 /* quiz */
-.quiz-wrap{max-width:640px;margin:0 auto;padding:0 1rem 2.5rem}
+.quiz-wrap{max-width:720px;margin:0 auto;padding:1rem 1rem 3rem}
 .quiz{background:var(--paper);border-radius:26px;box-shadow:var(--shadow);padding:1.6rem 1.4rem;text-align:center;border:3px solid var(--sun)}
 .quiz h2{justify-content:center;font-family:"Hachi Maru Pop","Zen Maru Gothic",sans-serif;font-size:1.5rem}
 .quiz p{color:var(--ink2);line-height:1.7;margin:.6rem 0 1rem}
@@ -82,9 +91,18 @@ h2{margin:0;font-size:1.25rem;line-height:1.35;display:flex;gap:.45rem;align-ite
 .qbtn:focus-visible{outline:4px solid var(--lav);outline-offset:3px}
 .qcount{font-weight:700;color:var(--ink2);letter-spacing:.1em}
 .qplay{margin:1rem auto;display:flex;max-width:280px}
-.choices{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem}
-.choice{border:3px solid var(--sky);border-radius:18px;background:var(--paper);color:var(--ink);font:inherit;font-weight:700;font-size:1.05rem;
-  padding:.8rem 1rem;cursor:pointer;display:flex;align-items:center;gap:.6rem;justify-content:center;transition:transform .1s}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1rem}
+.choice{border:3px solid var(--sky);border-radius:18px;background:var(--paper);color:var(--ink);font:inherit;font-weight:700;font-size:1rem;
+  padding:.6rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.5rem;transition:transform .1s}
+.choice .thumb{width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:var(--sky2);display:grid;place-items:center}
+.choice .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.choice .thumb.emoji{font-size:2.6rem;background:linear-gradient(135deg,var(--lav),var(--coral))}
+.choice .cname{line-height:1.3}
+@media (max-width:520px){
+  .choices{grid-template-columns:1fr}
+  .choice{flex-direction:row;justify-content:flex-start;text-align:left}
+  .choice .thumb{width:96px;flex:none}
+}
 .choice:hover{transform:scale(1.02);border-color:var(--lav)}
 .choice:focus-visible{outline:4px solid var(--lav);outline-offset:2px}
 .choice.right{border-color:var(--mint);background:var(--mint);color:#0B3D2A}
@@ -107,6 +125,12 @@ footer{text-align:center;padding:1rem 1rem 3rem;color:var(--ink2);font-size:.95r
   <div class="author">御田小学校 五年二組　鈴木 百花菜</div>
 </header>
 
+<nav class="tabs" role="tablist" aria-label="ページ切りかえ">
+  <button class="tab" id="tab-btn-map" role="tab" aria-selected="true" aria-controls="tab-map" type="button">📖 はっぴょう編</button>
+  <button class="tab" id="tab-btn-quiz" role="tab" aria-selected="false" aria-controls="tab-quiz" type="button">🎵 クイズ編</button>
+</nav>
+
+<section id="tab-map" role="tabpanel">
 <main class="grid">
 
 <article class="card" data-n="01">
@@ -326,7 +350,10 @@ footer{text-align:center;padding:1rem 1rem 3rem;color:var(--ink2);font-size:.95r
   </div>
 </article>
 </main>
+<footer>ぜんぶで 18 この音を あつめたよ 🎧</footer>
+</section>
 
+<section id="tab-quiz" role="tabpanel" class="qhide">
 <div class="quiz-wrap">
 <section class="quiz" aria-label="音あてクイズ">
   <div id="q-start">
@@ -351,8 +378,7 @@ footer{text-align:center;padding:1rem 1rem 3rem;color:var(--ink2);font-size:.95r
   </div>
 </section>
 </div>
-
-<footer>ぜんぶで 18 この音を あつめたよ 🎧</footer>
+</section>
 
 <script>
 (function(){
@@ -393,7 +419,8 @@ footer{text-align:center;padding:1rem 1rem 3rem;color:var(--ink2);font-size:.95r
   cards.forEach(card=>{
     const n=card.dataset.n;
     const b=card.querySelector('.play'), txt=b.querySelector('.btn-txt');
-    bank[n]={b64:card.querySelector('.snd').textContent,buf:null,
+    const im=card.querySelector('.pic img');
+    bank[n]={b64:card.querySelector('.snd').textContent,buf:null,img:im?im.src:null,
       name:card.querySelector('h2').textContent.trim(),emoji:card.querySelector('.ico').textContent};
     const ui={
       loading:()=>{txt.textContent='よみこみ中…';},
@@ -432,8 +459,14 @@ footer{text-align:center;padding:1rem 1rem 3rem;color:var(--ink2);font-size:.95r
     const box=$('q-choices'); box.innerHTML='';
     opts.forEach(n=>{
       const btn=document.createElement('button');
-      btn.type='button'; btn.className='choice';
-      btn.textContent=bank[n].emoji+' '+bank[n].name.replace(bank[n].emoji,'').trim();
+      btn.type='button'; btn.className='choice'; btn.dataset.n=n;
+      const th=document.createElement('span'); th.className='thumb';
+      const src=bank[n].img;
+      if(src){const im=document.createElement('img'); im.src=src; im.alt=''; th.appendChild(im);}
+      else{th.classList.add('emoji'); th.textContent=bank[n].emoji;}
+      const nm=document.createElement('span'); nm.className='cname';
+      nm.textContent=bank[n].emoji+' '+bank[n].name.replace(bank[n].emoji,'').trim();
+      btn.append(th,nm);
       btn.addEventListener('click',()=>pick(btn,n,ans));
       box.appendChild(btn);
     });
@@ -445,7 +478,7 @@ footer{text-align:center;padding:1rem 1rem 3rem;color:var(--ink2);font-size:.95r
     [...$('q-choices').children].forEach(c=>{c.disabled=true;});
     if(n===ans){score++; btn.classList.add('right'); $('q-mark').textContent='⭕ せいかい！';}
     else{btn.classList.add('wrong');
-      [...$('q-choices').children].forEach(c=>{if(c.textContent.includes(bank[ans].name.replace(bank[ans].emoji,'').trim()))c.classList.add('right');});
+      [...$('q-choices').children].forEach(c=>{if(c.dataset.n===ans)c.classList.add('right');});
       $('q-mark').textContent='❌ ざんねん…';}
     setTimeout(()=>{ qi++; if(qi<qs.length)showQ(); else finish(); },1600);
   }
@@ -461,6 +494,20 @@ footer{text-align:center;padding:1rem 1rem 3rem;color:var(--ink2);font-size:.95r
   });
   $('q-go').addEventListener('click',startQuiz);
   $('q-again').addEventListener('click',startQuiz);
+
+  /* ---- tabs ---- */
+  const tabs=[['tab-btn-map','tab-map'],['tab-btn-quiz','tab-quiz']];
+  tabs.forEach(([btnId,panelId])=>{
+    $(btnId).addEventListener('click',()=>{
+      stopAll(); qui.off();
+      tabs.forEach(([b,pn])=>{
+        const sel=b===btnId;
+        $(b).setAttribute('aria-selected',sel?'true':'false');
+        $(pn).classList.toggle('qhide',!sel);
+      });
+      window.scrollTo({top:0});
+    });
+  });
 })();
 </script>
 
